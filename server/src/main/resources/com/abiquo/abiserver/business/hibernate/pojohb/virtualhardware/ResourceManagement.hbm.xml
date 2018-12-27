@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB" table="rasd_management">
+        <id name="idManagement" type="java.lang.Integer">
+            <column name="idManagement" not-null="true" />
+            <generator class="identity" />
+        </id>
+        <property name="idResourceType" type="java.lang.String">
+            <column length="50" name="idResourceType" not-null="true" />
+        </property>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData" fetch="select" name="rasd" cascade="all">
+            <column length="5" name="idResource" not-null="false" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB" fetch="select" name="virtualDataCenter">
+            <column name="idVirtualDataCenter" not-null="false" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" fetch="select" name="virtualMachine">
+            <column name="idVM" not-null="false" />
+        </many-to-one>
+        <many-to-one entity-name="VirtualappHB" fetch="select" name="virtualApp" not-null="true">
+            <column name="idVirtualApp" not-null="false" />
+        </many-to-one>
+        <joined-subclass name="com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB" table="ip_pool_management">
+            <key column="idManagement" />
+           <!--  <property name="dhcpServiceId" type="java.lang.Integer">
+                <column name="dhcp_service_id" not-null="true" />
+            </property>--> 
+            <property name="vlanNetworkName" type="java.lang.String">
+                <column name="vlan_network_name" not-null="true" />
+            </property>
+            <property name="ip" type="java.lang.String">
+                <column name="ip" not-null="true" />
+            </property>
+            <property name="mac" type="java.lang.String">
+                <column name="mac" not-null="false" />
+            </property>
+            <property name="name" type="java.lang.String">
+                <column name="name" length="20" not-null="false" />
+            </property>
+            <property name="vlanNetworkId" type="java.lang.Integer">
+                <column name="vlan_network_id" not-null="false" />
+            </property>
+            <property name="quarantine" type="boolean">
+                <column name="quarantine" not-null="true" />
+            </property>
+            <property name="available" type="boolean">
+                <column name="available" not-null="true" />
+            </property>
+        </joined-subclass>
+    </class>
+    <query name="IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER"> Select distinct(ent) from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip inner join ip.virtualDataCenter vdc inner join vdc.enterpriseHB ent
+        where vdc.idDataCenter = :datacenterId and ent.name like :filterLike
+    </query>
+    <query name="IP_POOL_MANAGEMENT_GET_IPADDRESS_FROM_MAC"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB where mac = :mac
+    </query>
+    <query name="IP_POOL.GET_BY_VLAN"> SELECT ippool FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ippool WHERE ippool.virtualMachine.idVm != :idVm AND ippool.vlanNetworkId =
+        :vlanNetworkId
+    </query>
+    <query name="IP_POOL.GET_BY_VIRTUAL_MACHIE"> SELECT ippool FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ippool WHERE ippool.virtualMachine.idVm = :idVm
+    </query>
+</hibernate-mapping>
